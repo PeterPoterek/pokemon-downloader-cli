@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import inquirer from "inquirer";
 
 let pokemonName = "";
+let input = [];
 
 const getPokemonName = () => {
   const questions = {
@@ -13,17 +14,16 @@ const getPokemonName = () => {
   inquirer.prompt(questions).then((anwser) => {
     pokemonName = anwser.pokemonName;
     downloadPokemon();
-    getUserInput();
   });
 };
 
-const getUserInput = () => {
+const getUserInput = async () => {
   const questions = {
     type: "checkbox",
-    message: "Select:",
+    message: "Which data to download:",
     name: "userInput",
     choices: [
-      new inquirer.Separator("Which to download "),
+      new inquirer.Separator("Select: "),
       {
         name: "Artwork",
       },
@@ -44,25 +44,27 @@ const getUserInput = () => {
     },
   };
 
-  inquirer.prompt(questions).then((answer) => console.log(answer));
+  return await inquirer.prompt(questions);
 };
 const downloadPokemon = async () => {
   try {
     const data = (await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)).json();
 
     const response = await data;
-    let stats = "";
-    for (const stat of response.stats) {
-      stats += `${stat.stat.name}: ${stat.base_stat}\n`;
+
+    const input = await getUserInput();
+    if (input.userInput.length === 3) {
+      let stats = "";
+      for (const stat of response.stats) {
+        stats += `${stat.stat.name}: ${stat.base_stat}\n`;
+      }
+
+      const artworkUrl = response.sprites.front_default;
+      const artwork = await fetch(artworkUrl);
+
+      fs.writeFile(`./pokemons/${pokemonName}.png`, artwork.body);
+      fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
     }
-
-    const spriteUrl = response.sprites.front_default;
-    const sprite = await fetch(spriteUrl);
-
-    fs.writeFile(`./pokemons/${pokemonName}.png`, sprite.body);
-    fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
-
-    console.log(`${pokemonName} downloaded`);
   } catch (err) {
     console.error("Enter valid pokemon name");
     getPokemonName();
