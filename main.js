@@ -8,8 +8,13 @@ const questions = {
   name: "pokemonName",
   message: "Write an pokemon name",
 };
-
-const download = async () => {
+const getPokemonName = () => {
+  inquirer.prompt(questions).then((anwser) => {
+    pokemonName = anwser.pokemonName;
+    downloadPokemon();
+  });
+};
+const downloadPokemon = async () => {
   try {
     const data = (await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)).json();
 
@@ -27,11 +32,9 @@ const download = async () => {
 
     console.log(`${pokemonName} downloaded`);
   } catch (err) {
-    console.error(err);
+    console.error("Enter valid pokemon name");
+    getPokemonName();
   }
 };
 
-inquirer.prompt(questions).then((anwsers) => {
-  pokemonName = anwsers.pokemonName;
-  download();
-});
+getPokemonName();
