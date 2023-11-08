@@ -8,5 +8,8 @@
   },
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "inquirer": "^9.2.12"
+  }
 }

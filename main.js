@@ -1,6 +1,13 @@
 import fs from "fs/promises";
+import inquirer from "inquirer";
 
-let pokemonName = "slowpoke";
+let pokemonName = "";
+
+const questions = {
+  type: "input",
+  name: "pokemonName",
+  message: "Write an pokemon name",
+};
 
 const download = async () => {
   try {
@@ -8,10 +15,7 @@ const download = async () => {
 
     const response = await data;
     let stats = "";
-    // console.log(response.stats);
     for (const stat of response.stats) {
-      //   console.log(`${stat.stat.name} : ${stat.base_stat}`);
-
       stats += `${stat.stat.name} : ${stat.base_stat}\n`;
     }
 
@@ -20,9 +24,14 @@ const download = async () => {
 
     fs.writeFile(`./pokemons/${pokemonName}.png`, sprite.body);
     fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
+
+    console.log(`${pokemonName} downloaded`);
   } catch (err) {
     console.error(err);
   }
 };
 
-download();
+inquirer.prompt(questions).then((anwsers) => {
+  pokemonName = anwsers.pokemonName;
+  download();
+});
