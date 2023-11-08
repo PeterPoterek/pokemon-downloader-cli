@@ -2,8 +2,16 @@ import fs from "fs/promises";
 import inquirer from "inquirer";
 
 let pokemonName = "";
-let input = [];
 
+const handleNextPokemon = async () => {
+  const options = {
+    type: "list",
+    name: "continue",
+    message: "Download Another Pokemon?",
+    choices: ["Yes", "No"],
+  };
+  return await inquirer.prompt(options);
+};
 const getPokemonName = () => {
   const questions = {
     type: "input",
@@ -52,8 +60,8 @@ const downloadPokemon = async () => {
 
     const response = await data;
 
-    const input = await getUserInput();
-    if (input.userInput.length === 3) {
+    const inputArr = await getUserInput();
+    if (inputArr.userInput.length === 3) {
       let stats = "";
       for (const stat of response.stats) {
         stats += `${stat.stat.name}: ${stat.base_stat}\n`;
@@ -64,6 +72,7 @@ const downloadPokemon = async () => {
 
       fs.writeFile(`./pokemons/${pokemonName}.png`, artwork.body);
       fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
+    } else {
     }
   } catch (err) {
     console.error("Enter valid pokemon name");
@@ -72,3 +81,4 @@ const downloadPokemon = async () => {
 };
 
 getPokemonName();
+// handleNextPokemon();
