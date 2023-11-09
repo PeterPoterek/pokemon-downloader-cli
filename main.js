@@ -77,10 +77,21 @@ const downloadStats = (response) => {
 const downloadSprites = async (response) => {
   const spritesJson = response.sprites;
 
-  const spritesArr = Object.keys(spritesJson)
+  const spritesUrlArr = Object.keys(spritesJson)
     .slice(0, 8)
     .map((key) => spritesJson[key])
     .filter((key) => key !== undefined);
+
+  spritesUrlArr.forEach((spriteUrl) => {
+    if (typeof spriteUrl === "string") {
+      fetch(spriteUrl).then((res) => {
+        const pattern = /[0-9/]/g;
+        const spriteFileName = spriteUrl.replace(pattern, "");
+
+        fs.writeFile(`./pokemons/${spriteFileName}`, res.body);
+      });
+    }
+  });
 };
 
 const downloadPokemon = async () => {
@@ -94,7 +105,31 @@ const downloadPokemon = async () => {
       downloadArtwork(response);
       downloadStats(response);
       downloadSprites(response);
-    } else {
+    } else if (inputArr.userInput.length === 2) {
+      if (inputArr.userInput.includes("Artwork") && inputArr.userInput.includes("Sprites")) {
+        console.log("Artwort and Sprites downloaded");
+        downloadArtwork(response);
+        downloadSprites(response);
+      } else if (inputArr.userInput.includes("Stats") && inputArr.userInput.includes("Sprites")) {
+        console.log("Stats and Sprites downloaded");
+        downloadStats(response);
+        downloadSprites(response);
+      } else if (inputArr.userInput.includes("Artwork") && inputArr.userInput.includes("Stats")) {
+        console.log("Artwork and Stats downloaded");
+        downloadArtwork(response);
+        downloadStats(response);
+      }
+    } else if (inputArr.userInput.length === 1) {
+      if (inputArr.userInput.includes("Artwork")) {
+        console.log("Artwort downloaded");
+        downloadArtwork(response);
+      } else if (inputArr.userInput.includes("Sprites")) {
+        console.log("Sprites downloaded");
+        downloadSprites(response);
+      } else if (inputArr.userInput.includes("Stats")) {
+        console.log("Stats downloaded");
+        downloadStats(response);
+      }
     }
   } catch (err) {
     console.error("Enter valid pokemon name");
