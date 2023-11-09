@@ -2,15 +2,18 @@ import fs from "fs/promises";
 import inquirer from "inquirer";
 
 let pokemonName = "";
-
-const handleNextPokemon = async () => {
+let proceed = "";
+const handleNextPokemon = () => {
   const options = {
     type: "list",
     name: "continue",
     message: "Download Another Pokemon?",
     choices: ["Yes", "No"],
   };
-  return await inquirer.prompt(options);
+  inquirer.prompt(options).then((answer) => {
+    console.log(answer);
+    let proceed = answer.continue;
+  });
 };
 const getPokemonName = () => {
   const questions = {
@@ -54,6 +57,32 @@ const getUserInput = async () => {
 
   return await inquirer.prompt(questions);
 };
+
+const downloadArtwork = async (response) => {
+  const artworkUrl = response.sprites.other["official-artwork"].front_default;
+  const artwork = await fetch(artworkUrl);
+
+  fs.writeFile(`./pokemons/${pokemonName}.png`, artwork.body);
+};
+
+const downloadStats = (response) => {
+  let stats = "";
+  for (const stat of response.stats) {
+    stats += `${stat.stat.name}: ${stat.base_stat}\n`;
+  }
+
+  fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
+};
+
+const downloadSprites = async (response) => {
+  const spritesJson = response.sprites;
+
+  const spritesArr = Object.keys(spritesJson)
+    .slice(0, 8)
+    .map((key) => spritesJson[key])
+    .filter((key) => key !== undefined);
+};
+
 const downloadPokemon = async () => {
   try {
     const data = (await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)).json();
@@ -62,16 +91,9 @@ const downloadPokemon = async () => {
 
     const inputArr = await getUserInput();
     if (inputArr.userInput.length === 3) {
-      let stats = "";
-      for (const stat of response.stats) {
-        stats += `${stat.stat.name}: ${stat.base_stat}\n`;
-      }
-
-      const artworkUrl = response.sprites.front_default;
-      const artwork = await fetch(artworkUrl);
-
-      fs.writeFile(`./pokemons/${pokemonName}.png`, artwork.body);
-      fs.writeFile(`./pokemons/${pokemonName}.txt`, stats);
+      downloadArtwork(response);
+      downloadStats(response);
+      downloadSprites(response);
     } else {
     }
   } catch (err) {
@@ -80,5 +102,10 @@ const downloadPokemon = async () => {
   }
 };
 
-getPokemonName();
 // handleNextPokemon();
+
+const handleLoop = () => {
+  getPokemonName();
+};
+
+handleLoop();
