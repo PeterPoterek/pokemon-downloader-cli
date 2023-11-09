@@ -87,8 +87,7 @@ const downloadSprites = async (response) => {
       fetch(spriteUrl).then((res) => {
         const pattern = /[0-9/]/g;
         const spriteFileName = spriteUrl.replace(pattern, "");
-
-        fs.writeFile(`./pokemons/${spriteFileName}`, res.body);
+        fs.writeFile(`./pokemons/${pokemonName}${spriteFileName.slice(spriteFileName.length - 13)}`, res.body);
       });
     }
   });
