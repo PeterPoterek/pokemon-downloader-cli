@@ -15,12 +15,48 @@ const fetchPokemon = async (pokemonName) => {
   return await response.json();
 };
 
+const getUserInput = async () => {
+  const questions = {
+    type: "checkbox",
+    message: "Which data to download:",
+    name: "input",
+    choices: [
+      new inquirer.Separator("Select: "),
+      {
+        name: "Artwork",
+      },
+      {
+        name: "Sprites",
+      },
+      {
+        name: "Stats",
+      },
+    ],
+  };
+
+  return await inquirer.prompt(questions);
+};
+
+const getAnotherPokeon = async () => {
+  const options = {
+    type: "list",
+    name: "continue",
+    message: "Download Another Pokemon?",
+    choices: ["Yes", "No"],
+  };
+  return await inquirer.prompt(options);
+};
+
 const handleLoop = async () => {
-  const pokemonName = await getPokemonName();
+  while (true) {
+    const pokemonName = await getPokemonName();
+    const json = await fetchPokemon(pokemonName.name);
 
-  const json = await fetchPokemon(pokemonName.name);
+    const userInput = await getUserInput();
 
-  console.log(json);
+    const shouldContinue = await getAnotherPokeon();
+    if (shouldContinue.continue === "No") break;
+  }
 };
 
 handleLoop();
