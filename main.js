@@ -54,7 +54,13 @@ const getAnotherPokeon = async () => {
 };
 
 const createFolder = async (pokemonName) => {
-  fs.mkdir(`./pokedex/${pokemonName}`);
+  const path = `./pokedex/${pokemonName}`;
+
+  try {
+    await fs.access(path);
+  } catch {
+    await fs.mkdir(path);
+  }
 };
 
 const downloadPokemonData = async (userInput, json, pokemonName) => {
