@@ -63,17 +63,51 @@ const createFolder = async (pokemonName) => {
   }
 };
 
+const downloadArtwork = async (json, pokemonName) => {
+  const url = json.sprites.other["official-artwork"].front_default;
+  console.log(url);
+  const artwork = await fetch(url);
+
+  await fs.writeFile(`./pokedex/${pokemonName}/${pokemonName}.png`, artwork.body);
+};
+const downloadSprites = async (json, pokemonName) => {
+  const spritesArr = json.sprites;
+
+  for (const [name, url] of Object.entries(spritesArr)) {
+    if (name !== "other" && name !== "versions") {
+      console.log(name);
+      const sprite = await fetch(url);
+
+      await fs.writeFile(`./pokedex/${pokemonName}/${name}.png`, sprite.body);
+    }
+  }
+};
+
+const downloadStats = async (json, pokemonName) => {
+  const statsArr = json.stats;
+  let stats = "";
+  for (const stat of statsArr) {
+    stats += `${stat.stat.name}: ${stat.base_stat}\n`;
+  }
+
+  fs.writeFile(`./pokedex/${pokemonName}/${pokemonName}-stats.txt`, stats);
+};
+
 const downloadPokemonData = async (userInput, json, pokemonName) => {
   createFolder(pokemonName);
 
   if (userInput.includes("Artwork")) {
     console.log("Artwork");
+
+    await downloadArtwork(json, pokemonName);
   }
   if (userInput.includes("Sprites")) {
     console.log("Sprites");
+    downloadSprites(json);
   }
   if (userInput.includes("Stats")) {
     console.log("Stats");
+    await downloadStats(json, pokemonName);
   }
 };
 
